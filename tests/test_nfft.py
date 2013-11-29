@@ -1,4 +1,4 @@
-"""Test suite for the linop_mri.fft module"""
+"""Test suite for the linop_mri.nfft module"""
 #linop-mri is free software: you can redistribute it and/or modify
 #it under the terms of the GNU General Public License as published by
 #the Free Software Foundation, either version 3 of the License, or
