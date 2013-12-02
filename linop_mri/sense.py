@@ -14,3 +14,22 @@
 #
 #You should have received a copy of the GNU General Public License
 #along with linop-mri.  If not, see <http://www.gnu.org/licenses/>.
+
+from linop import BlockVerticalLinearOperator
+from linop_mri.fft import FFTOperator
+from linop_mri.nfft import FFTOperator
+
+
+class SENSEOperator(BlockVerticalLinearOperator):
+    def __init__(self, weights, **kwargs):
+        pass
+
+
+class CartesianSENSEOperator(SENSEOperator):
+    def __init__(self, weights, **kwargs):
+        pass
+
+
+class NonCartesianSENSEOperator(SENSEOperator):
+    def __init__(self, weights, plan, **kwargs):
+        pass
