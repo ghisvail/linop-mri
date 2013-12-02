@@ -15,7 +15,7 @@
 #along with linop-mri.  If not, see <http://www.gnu.org/licenses/>.
 
 import numpy as np
-from linop import LinearOperator
+from linop import LinearOperator, IdentityOperator
 
 try:
     from pyfftw.interfaces import numpy_fft as fft
@@ -26,13 +26,11 @@ except ImportError:
 __all__ = ('FFTOperator', 'FFTShiftOperator')
 
 
-
-
-
-
 class FFTOperator(LinearOperator):
-    def __init__(self, nargin, nargout, ndshape, axes=None, s=None,
-                 **kwargs):
+
+    """The Fourier transform operator."""
+
+    def __init__(self, shapein, axes=None, s=None, **kwargs):
         if 'symmetric' in kwargs:
             kwargs.pop('symmetric')
         if 'matvec' in kwargs:
@@ -41,26 +39,75 @@ class FFTOperator(LinearOperator):
             kwargs.pop('matvec_transp')
         if 'dtype' in kwargs:
             kwargs.pop('dtype')
+        transpose_of = kwargs.get('transpose_of', None)
+
+        nargin = nargout = np.prod(shapein)
+        dtype = np.complex
 
         def matvec(x):
-            return fft.fftn(x.reshape(ndshape), axes=axes, s=s)
+            return fft.fftn(x.reshape(shapein), axes=axes, s=s)
 
-        def matvec_transp(x):
-            return fft.ifftn(x.reshape(ndshape), axes=axes, s=s)
+        if transpose_of is None:
+            H = IFFTOperator(shapein=shapein, axes=axes, s=s, dtype=dtype,
+                             transpose_of=self, **kwargs)
 
-        super(FFTOperator, self).__init__(
-            nargin, nargout, symmetric=False, matvec=matvec,
-            matvec_transp=matvec_transp, dtype=dtype, **kwargs)
+        super(FFTOperator, self).__init__(nargin, nargout, symmetric=False,
+            matvec=matvec, dtype=dtype, transpose_of=H, **kwargs)
+
+    # TODO: think about decorating unitary operators
+    def _LinearOperator__mul_linop(self, op):
+        if op.H is self:
+            return IdentityOperator(self.nargin, dtype=self.dtype)
+        else:
+            super(FFTOperator, self)._LinearOperator__mul_linop(op)
 
 
-class FFTShiftOperator(LinearOperator):
-    def __init__(self, nargin, nargout, ndshape, axes=None, **kwargs):
+class IFFTOperator(LinearOperator):
+
+    """The Fourier transform operator."""
+
+    def __init__(self, shapein, axes=None, s=None, **kwargs):
         if 'symmetric' in kwargs:
             kwargs.pop('symmetric')
         if 'matvec' in kwargs:
             kwargs.pop('matvec')
         if 'matvec_transp' in kwargs:
             kwargs.pop('matvec_transp')
+        if 'dtype' in kwargs:
+            kwargs.pop('dtype')
+        transpose_of = kwargs.get('transpose_of', None)
+
+        nargin = nargout = np.prod(shapein)
+        dtype = np.complex
+
+        def matvec(x):
+            return fft.ifftn(x.reshape(shapein), axes=axes, s=s)
+
+        if transpose_of is None:
+            H = FFTOperator(shapein=shapein, axes=axes, s=s, dtype=dtype,
+                            transpose_of=self, **kwargs)
+
+        super(IFFTOperator, self).__init__(nargin, nargout, symmetric=False,
+            matvec=matvec, dtype=dtype, **kwargs)
+
+    # TODO: think about decorating unitary operators
+    def _LinearOperator__mul_linop(self, op):
+        if op.H is self:
+            return IdentityOperator(self.nargin, dtype=self.dtype)
+        else:
+            super(IFFTOperator, self)._LinearOperator__mul_linop(op)
+
+
+class FFTShiftOperator(LinearOperator):
+    def __init__(self, shapein, axes=None, **kwargs):
+        if 'symmetric' in kwargs:
+            kwargs.pop('symmetric')
+        if 'matvec' in kwargs:
+            kwargs.pop('matvec')
+        if 'matvec_transp' in kwargs:
+            kwargs.pop('matvec_transp')
+
+        nargin = nargout = np.prod(shapein)
         dtype = kwargs.pop('dtype', np.complex)
 
         def matvec(x):
