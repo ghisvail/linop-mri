@@ -22,21 +22,17 @@ __all__ = ('NFFTOperator',)
 
 
 class NFFTOperator(LinearOperator):
-    
-    """NFFTOperator."""
-    
+
+    """The Non-uniform Fourier transform operator."""
+
     def __init__(self, plan, **kwargs):
-        
+
         nargin = np.prod(plan.N)
         nargout = plan.M
         matvec = lambda x: return plan.forward(f_hat=x)
-        matvec_transp = lambda x: return plan.adjoint(f=x)        
-        dtype = np.complex
+        matvec_transp = lambda x: return plan.adjoint(f=x)
+        dtype = np.complex128
 
-        super(NFFTOperator, self).__init__(nargin,
-                                           nargout,
-                                           symmetric=False,
-                                           matvec=matvec,
-                                           matvec_transp=matvec_transp,
-                                           dtype=np.complex128,
-                                           **kwargs)
+        super(NFFTOperator, self).__init__(
+            nargin, nargout, symmetric=False, matvec=matvec,
+            matvec_transp=matvec_transp, dtype=np.complex128, **kwargs)
