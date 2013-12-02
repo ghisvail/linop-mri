@@ -18,15 +18,25 @@
 from linop import LinearOperator
 
 
-__all__ = ('NFFTOperator')
+__all__ = ('NFFTOperator',)
 
 
-class _ForwardNFFTOperator(LinearOperator):
-    pass
+class NFFTOperator(LinearOperator):
+    
+    """NFFTOperator."""
+    
+    def __init__(self, plan, **kwargs):
+        
+        nargin = np.prod(plan.N)
+        nargout = plan.M
+        matvec = lambda x: return plan.forward(f_hat=x)
+        matvec_transp = lambda x: return plan.adjoint(f=x)        
+        dtype = np.complex
 
-
-class _AdjointNFFTOperator(LinearOperator):
-    pass
-
-
-NFFTOperator = _ForwardNFFTOperator
+        super(NFFTOperator, self).__init__(nargin,
+                                           nargout,
+                                           symmetric=False,
+                                           matvec=matvec,
+                                           matvec_transp=matvec_transp,
+                                           dtype=np.complex128,
+                                           **kwargs)

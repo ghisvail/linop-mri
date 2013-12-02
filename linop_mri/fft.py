@@ -26,8 +26,13 @@ except ImportError:
 __all__ = ('FFTOperator', 'FFTShiftOperator')
 
 
+
+
+
+
 class FFTOperator(LinearOperator):
-    def __init__(self, nargin, nargout, fftshape, axes=None, s=None, **kwargs):
+    def __init__(self, nargin, nargout, ndshape, axes=None, s=None,
+                 **kwargs):
         if 'symmetric' in kwargs:
             kwargs.pop('symmetric')
         if 'matvec' in kwargs:
@@ -38,21 +43,18 @@ class FFTOperator(LinearOperator):
             kwargs.pop('dtype')
 
         def matvec(x):
-            return fft.fftn(x.reshape(fftshape), axes=axes, s=s)
+            return fft.fftn(x.reshape(ndshape), axes=axes, s=s)
 
         def matvec_transp(x):
-            return fft.ifftn(x.reshape(fftshape), axes=axes, s=s)
+            return fft.ifftn(x.reshape(ndshape), axes=axes, s=s)
 
-        super(NumpyFFTOperator, self).__init__(nargin, nargout,
-                                               matvec=matvec,
-                                               matvec_transp=matvec_transp,
-                                               symmetric=False,
-                                               dtype=np.complex,
-                                               **kwargs)
+        super(FFTOperator, self).__init__(
+            nargin, nargout, symmetric=False, matvec=matvec,
+            matvec_transp=matvec_transp, dtype=dtype, **kwargs)
 
 
 class FFTShiftOperator(LinearOperator):
-    def __init__(self, nargin, nargout, fftshape, axes=None, **kwargs):
+    def __init__(self, nargin, nargout, ndshape, axes=None, **kwargs):
         if 'symmetric' in kwargs:
             kwargs.pop('symmetric')
         if 'matvec' in kwargs:
@@ -62,14 +64,11 @@ class FFTShiftOperator(LinearOperator):
         dtype = kwargs.pop('dtype', np.complex)
 
         def matvec(x):
-            return fft.fftshift(x.reshape(fftshape), axes=axes)
+            return fft.fftshift(x.reshape(ndshape), axes=axes)
 
         def matvec_transp(x):
-            return fft.ifftshift(x.reshape(fftshape), axes=axes)
+            return fft.ifftshift(x.reshape(ndshape), axes=axes)
 
-        super(NumpyFFTShiftOperator, self).__init__(nargin, nargout,
-                                                    matvec=matvec,
-                                                    matvec_transp=matvec_transp,
-                                                    symmetric=False,
-                                                    dtype=dtype
-                                                    **kwargs)
+        super(FFTShiftOperator, self).__init__(
+            nargin, nargout, symmetric=False, matvec=matvec,
+            matvec_transp=matvec_transp, dtype=dtype, **kwargs)
