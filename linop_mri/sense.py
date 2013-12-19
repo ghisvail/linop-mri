@@ -15,21 +15,22 @@
 #You should have received a copy of the GNU General Public License
 #along with linop-mri.  If not, see <http://www.gnu.org/licenses/>.
 
-from linop import BlockVerticalLinearOperator
-from linop_mri.fft import FFTOperator
-from linop_mri.nfft import FFTOperator
+import pykrylov.cg as cg
 
 
-class SENSEOperator(BlockVerticalLinearOperator):
-    def __init__(self, weights, **kwargs):
-        pass
+class IterativeSENSE(cg.CG):
+    def __init__(self, E, D=None, I=None, **kwargs):
+        super(IterativeSENSE).__init__(op=None, **kwargs)
+
+    def solve(m, **kwargs):
+        super(IterativeSENSE).__init__(rhs=None, **kwargs)
 
 
-class CartesianSENSEOperator(SENSEOperator):
-    def __init__(self, weights, **kwargs):
-        pass
+def get_D(weights, ncoils):
+    pass
 
-
-class NonCartesianSENSEOperator(SENSEOperator):
-    def __init__(self, weights, plan, **kwargs):
-        pass
+def get_E():
+    pass
+    
+def get_I():
+    pass
